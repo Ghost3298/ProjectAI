@@ -1,0 +1,50 @@
+services:
+
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: secret_user_name
+      POSTGRES_PASSWORD: secret_password
+      POSTGRES_DB: db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadminpassword
+    volumes:
+      - minio_data:/data
+    command: server --console-address ":9001" /data
+    restart: unless-stopped
+
+  valkey:
+    image: valkey/valkey:latest
+    container_name: valkey_server
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey-data:/data
+    command: valkey-server --requirepass "secure_password"
+
+volumes:
+  pgdata:
+  minio_data:
+  valkey-data:
+    driver: local
