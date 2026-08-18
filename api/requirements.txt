@@ -2,3 +2,6 @@ fastapi
 uvicorn[standard]
 celery
 redis
+sqlalchemy
+psycopg2-binary
+boto3
