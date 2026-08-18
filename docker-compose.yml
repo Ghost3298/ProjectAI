@@ -3,9 +3,9 @@ services:
   postgres:
     image: postgres:17
     environment:
-      POSTGRES_USER: secret_user_name
-      POSTGRES_PASSWORD: secret_password
-      POSTGRES_DB: db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -26,8 +26,8 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadminpassword
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes:
       - minio_data:/data
     command: server --console-address ":9001" /data
@@ -41,7 +41,7 @@ services:
       - "6379:6379"
     volumes:
       - valkey-data:/data
-    command: valkey-server --requirepass "secure_password"
+    command: valkey-server --requirepass "${SECURE_PASSWORD}"
 
 volumes:
   pgdata:
