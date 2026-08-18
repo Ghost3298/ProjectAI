@@ -42,6 +42,35 @@ services:
     volumes:
       - valkey-data:/data
     command: valkey-server --requirepass "${SECURE_PASSWORD}"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "-a", "$$SECURE_PASSWORD", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+
+  api:
+    build: ./api/
+    ports:
+      - "8000:8000"
+    environment:
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    build: ./api/
+    environment:
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+    depends_on:
+      valkey:
+        condition: service_healthy
+    command: ["celery", "-A", "celery_app", "worker", "--loglevel", "info"]
+    restart: unless-stopped
 
 volumes:
   pgdata:
