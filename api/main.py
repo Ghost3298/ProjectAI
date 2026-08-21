@@ -1,12 +1,21 @@
-from fastapi import Depends, FastAPI, UploadFile
+from fastapi import Depends, FastAPI, UploadFile, HTTPException
 from db import Base, engine, get_db
 from models import Job
 from storage import ensure_bucket_exists, s3_client
 from sqlalchemy.orm import Session
 import os
 import uuid
+from celery_app import process_job
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 Base.metadata.create_all(bind=engine)
 ensure_bucket_exists(os.environ.get('MINIO_BUCKET'))
@@ -33,9 +42,23 @@ async def create_job(file: UploadFile, db: Session = Depends(get_db)):
         original_filename = file.filename,
         storage_path = storage_path
     )
+
     db.add(new_job)
     db.commit()
 
+    process_job.delay(str(job_id))
+    
     return {"job_id": str(job_id)}
 
-    
+@app.get("/jobs/{job_id}")
+def get_job(job_id: str, db: Session = Depends(get_db)):
+    job = db.query(Job).filter(Job.id == job_id).first()
+
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    return{
+        "job_id" : str(job.id),
+        "status" : job.status,
+        "transcript" : job.transcript
+    }
