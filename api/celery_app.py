@@ -17,7 +17,7 @@ whisper_model = None
 def get_whisper_model():
     global whisper_model
     if whisper_model is None:
-        whisper_model = WhisperModel("small", device="cuda", compute_type="float16")
+        whisper_model = WhisperModel("small", device="cuda", compute_type="int8_float16")
     return whisper_model
 
 @app.task

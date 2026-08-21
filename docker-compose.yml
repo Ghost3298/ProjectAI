@@ -86,6 +86,8 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
+    volumes:
+      - hf_cache:/root/.cache/huggingface
     deploy:
       resources:
         reservations:
@@ -104,3 +106,4 @@ volumes:
   minio_data:
   valkey-data:
     driver: local
+  hf_cache:
