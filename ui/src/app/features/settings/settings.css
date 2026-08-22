@@ -1,0 +1,94 @@
+.settings {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 14px 12px;
+}
+
+.settingGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.groupLabel {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--rack-ink-3);
+    padding: 0 6px 6px;
+}
+
+.settingRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 8px;
+    background: transparent;
+    border: none;
+    border-radius: var(--r-md);
+    color: var(--rack-ink);
+    text-align: left;
+}
+
+.settingRow:hover {
+    background: var(--rack-2);
+}
+
+.settingRow mat-icon {
+    font-size: 19px;
+    width: 19px;
+    height: 19px;
+    color: var(--rack-ink-3);
+    flex-shrink: 0;
+}
+
+.rowText {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.rowTitle {
+    font-size: 13px;
+}
+
+.rowSub {
+    font-size: 11px;
+    color: var(--rack-ink-3);
+}
+
+.switch {
+    position: relative;
+    flex-shrink: 0;
+    width: 34px;
+    height: 20px;
+    border-radius: var(--r-pill);
+    background: var(--rack-3);
+    border: 1px solid var(--rack-edge);
+    transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.switch .knob {
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--rack-ink-2);
+    transition: transform var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+
+.switch.on {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.switch.on .knob {
+    transform: translateX(14px);
+    background: #ffffff;
+}

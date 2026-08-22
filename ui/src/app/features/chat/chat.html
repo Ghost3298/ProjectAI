@@ -1,0 +1,62 @@
+<div class="chat">
+    <div class="dialogue" #dialogueRef>
+        @if (notes().length === 0) {
+            <div class="empty-state">
+                <mat-icon>forum</mat-icon>
+                <span class="empty-title">Nothing here yet</span>
+                <span class="empty-hint">Start recording or type a note below to begin this session's transcript.</span>
+            </div>
+        } @else {
+            @for (note of notes(); track note.id) {
+                <div class="noteRow">
+                    <span class="noteTime">{{ note.time | date: 'shortTime' }}</span>
+                    <span class="noteText">{{ note.text }}</span>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="tools">
+        <button class="toolButn" type="button" [disabled]="notes().length === 0" (click)="copyText()">
+            <mat-icon>{{ copied() ? 'check' : 'content_copy' }}</mat-icon>{{ copied() ? 'Copied' : 'Copy text' }}
+        </button>
+        <button class="toolButn" type="button" [disabled]="notes().length === 0" (click)="saveAsTxt()">
+            <mat-icon>download</mat-icon>Save as txt
+        </button>
+    </div>
+</div>
+
+<div class="messageArea">
+    @if (attachments().length > 0) {
+        <div class="attachmentRow">
+            @for (name of attachments(); track name) {
+                <span class="chip">
+                    <mat-icon>description</mat-icon>
+                    {{ name }}
+                    <button type="button" class="chipRemove" (click)="removeAttachment(name)">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </span>
+            }
+        </div>
+    }
+
+    <form class="inputArea" (ngSubmit)="submitNote($event)">
+        <input
+            type="text"
+            placeholder="Add a note to the session..."
+            [value]="draft()"
+            (input)="updateDraft($any($event.target).value)"
+        />
+        <button type="submit" [disabled]="!draft().trim()"><mat-icon>send</mat-icon></button>
+    </form>
+
+    <div class="actions">
+        <input type="file" #fileInput hidden multiple (change)="onFilesSelected($event)" />
+        <button type="button" (click)="fileInput.click()"><mat-icon>attach_file</mat-icon></button>
+        <button type="button" class="recordButn" [class.active]="isRecording()" (click)="toggleRecording()">
+            <mat-icon>{{ isRecording() ? 'stop_circle' : 'mic' }}</mat-icon>
+            {{ isRecording() ? 'Stop' : 'Record' }}
+        </button>
+    </div>
+</div>

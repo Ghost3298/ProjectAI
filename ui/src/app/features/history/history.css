@@ -1,0 +1,100 @@
+.history {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.searchRow {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px;
+    padding: 8px 12px;
+    background: var(--rack-2);
+    border: 1px solid var(--rack-edge);
+    border-radius: var(--r-md);
+}
+
+.searchRow mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--rack-ink-3);
+}
+
+.searchRow input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--rack-ink);
+    font-size: 13px;
+    outline: none;
+}
+
+.searchRow input::placeholder {
+    color: var(--rack-ink-3);
+}
+
+.sessionList {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 8px 12px;
+}
+
+.sessionList .empty-state {
+    color: var(--rack-ink-3);
+}
+
+.sessionList .empty-state .empty-title {
+    color: var(--rack-ink-2);
+}
+
+.sessionItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--r-md);
+    color: var(--rack-ink);
+    text-align: left;
+}
+
+.sessionItem:hover {
+    background: var(--rack-2);
+    border-color: var(--rack-edge);
+}
+
+.sessionItem mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--rack-ink-3);
+    flex-shrink: 0;
+}
+
+.sessionMeta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.sessionTitle {
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sessionSub {
+    font-size: 11px;
+    color: var(--rack-ink-3);
+}

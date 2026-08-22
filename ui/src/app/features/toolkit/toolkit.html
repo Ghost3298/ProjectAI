@@ -1,0 +1,22 @@
+<div class="toolkit">
+    @if (tools().length === 0) {
+        <div class="empty-state">
+            <mat-icon>build</mat-icon>
+            <span class="empty-title">No tools connected</span>
+            <span class="empty-hint">Connect a tool to let the assistant take actions during a session.</span>
+            <button type="button" class="connectButn">
+                <mat-icon>add</mat-icon>
+                Connect a tool
+            </button>
+        </div>
+    } @else {
+        <div class="toolList">
+            @for (tool of tools(); track tool.id) {
+                <div class="toolItem">
+                    <mat-icon>{{ tool.icon }}</mat-icon>
+                    <span>{{ tool.name }}</span>
+                </div>
+            }
+        </div>
+    }
+</div>

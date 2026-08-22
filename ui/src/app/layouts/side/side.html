@@ -1,0 +1,25 @@
+<div class="sidePanel">
+    <div class="tabRow" role="tablist">
+        @for (tab of tabs; track tab.id) {
+            <button
+                type="button"
+                role="tab"
+                class="tabButn"
+                [class.active]="activePanel() === tab.id"
+                [attr.aria-selected]="activePanel() === tab.id"
+                (click)="selectPanel(tab.id)"
+            >
+                <mat-icon>{{ tab.icon }}</mat-icon>
+                <span>{{ tab.label }}</span>
+            </button>
+        }
+    </div>
+
+    <div class="panelContent">
+        @switch (activePanel()) {
+            @case ('history') { <app-history></app-history> }
+            @case ('toolkit') { <app-toolkit></app-toolkit> }
+            @case ('settings') { <app-settings></app-settings> }
+        }
+    </div>
+</div>

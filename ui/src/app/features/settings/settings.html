@@ -1,0 +1,42 @@
+<div class="settings">
+    <div class="settingGroup">
+        <span class="groupLabel">Appearance</span>
+
+        <button type="button" class="settingRow" (click)="toggleTheme()">
+            <mat-icon>{{ theme() === 'dark' ? 'dark_mode' : 'light_mode' }}</mat-icon>
+            <div class="rowText">
+                <span class="rowTitle">Dark mode</span>
+                <span class="rowSub">Switch between light and dark surfaces</span>
+            </div>
+            <span class="switch" [class.on]="theme() === 'dark'">
+                <span class="knob"></span>
+            </span>
+        </button>
+    </div>
+
+    <div class="settingGroup">
+        <span class="groupLabel">Session</span>
+
+        <button type="button" class="settingRow" (click)="toggleAutosave()">
+            <mat-icon>save</mat-icon>
+            <div class="rowText">
+                <span class="rowTitle">Autosave transcripts</span>
+                <span class="rowSub">Keep a local copy as the session runs</span>
+            </div>
+            <span class="switch" [class.on]="autosave()">
+                <span class="knob"></span>
+            </span>
+        </button>
+
+        <button type="button" class="settingRow" (click)="toggleTimestamps()">
+            <mat-icon>schedule</mat-icon>
+            <div class="rowText">
+                <span class="rowTitle">Show timestamps</span>
+                <span class="rowSub">Display the time next to each note</span>
+            </div>
+            <span class="switch" [class.on]="showTimestamps()">
+                <span class="knob"></span>
+            </span>
+        </button>
+    </div>
+</div>

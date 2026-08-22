@@ -1,0 +1,135 @@
+:root {
+  /* Paper */
+  --ground:      #e7ebef;
+  --sheet:       #ffffff;
+  --sheet-2:     #f1f4f7;
+  --sheet-3:     #e6ecf1;
+  --edge:        #d5dce3;
+  --edge-strong: #c2ccd6;
+  --ink:         #151a21;
+  --ink-2:       #4c5866;
+  --ink-3:       #7c8896;
+
+  /* Chassis */
+  --rack:        #1a2028;
+  --rack-2:      #232b35;
+  --rack-3:      #2c3742;
+  --rack-edge:   #333d49;
+  --rack-ink:    #e4e9ee;
+  --rack-ink-2:  #94a2b1;
+  --rack-ink-3:  #6b7887;
+
+  /* Signal */
+  --accent:      #0e7c6b;
+  --accent-press:#0a5f52;
+  --accent-soft: #e2f2ef;
+  --accent-lit:  #35c3ac;
+  --danger:      #b4462f;
+
+  /* Type */
+  --font-ui:   'Instrument Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Shape + motion */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-pill: 999px;
+  --shadow-1: 0 1px 2px rgb(21 26 33 / 0.06), 0 1px 1px rgb(21 26 33 / 0.04);
+  --shadow-2: 0 10px 30px -12px rgb(21 26 33 / 0.22), 0 2px 6px rgb(21 26 33 / 0.06);
+  --dur: 160ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+/* Dark theme: remap the "paper" surface tokens onto the chassis palette.
+   Toggled from Settings by setting data-theme="dark" on the root element. */
+:root[data-theme='dark'] {
+  --ground:      #12161c;
+  --sheet:       var(--rack-2);
+  --sheet-2:     var(--rack);
+  --sheet-3:     var(--rack-3);
+  --edge:        var(--rack-edge);
+  --edge-strong: #3d4956;
+  --ink:         var(--rack-ink);
+  --ink-2:       var(--rack-ink-2);
+  --ink-3:       var(--rack-ink-3);
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.35), 0 1px 1px rgb(0 0 0 / 0.2);
+  --shadow-2: 0 10px 30px -12px rgb(0 0 0 / 0.55), 0 2px 6px rgb(0 0 0 / 0.3);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input, textarea {
+  font-family: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--edge-strong);
+  border-radius: var(--r-pill);
+}
+:root[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: var(--rack-edge);
+}
+
+/* Shared empty-state block, reused by History / Toolkit and the chat dialogue. */
+.empty-state {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  padding: 24px;
+  color: var(--ink-3);
+}
+
+.empty-state mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 6px;
+  opacity: 0.7;
+}
+
+.empty-state .empty-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+
+.empty-state .empty-hint {
+  font-size: 12.5px;
+  max-width: 240px;
+}

@@ -1,0 +1,239 @@
+.chat{
+    width: 100%;
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    background: var(--sheet);
+    border: 1px solid var(--edge);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-1);
+    overflow: hidden;
+}
+
+.dialogue{
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 10px 4px;
+}
+
+.dialogue .empty-state {
+    color: var(--ink-3);
+}
+
+.noteRow {
+    display: flex;
+    gap: 10px;
+    padding: 8px 16px;
+    border-radius: var(--r-md);
+}
+
+.noteRow:hover {
+    background: var(--sheet-2);
+}
+
+.noteTime {
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    padding-top: 2px;
+}
+
+.noteText {
+    font-size: 14px;
+    color: var(--ink);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.tools{
+    flex-shrink: 0;
+    height: 44px;
+    border-top: 1px solid var(--edge);
+    padding: 5px 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.toolButn{
+    height: 30px;
+    padding: 0 14px;
+    background: var(--sheet);
+    border: 1px solid var(--edge-strong);
+    border-radius: var(--r-pill);
+    font-size: 12px;
+    color: var(--ink-2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.toolButn mat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+}
+
+.toolButn:hover:not(:disabled) {
+    background: var(--sheet-2);
+    border-color: var(--ink-3);
+    color: var(--ink);
+}
+
+.toolButn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.messageArea{
+    width: 100%;
+    height: auto;
+    flex-shrink: 0;
+    margin: 10px 0;
+    background: var(--sheet);
+    border: 1px solid var(--edge);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-1);
+    overflow: hidden;
+}
+
+.attachmentRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 12px 0;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px 4px 10px;
+    background: var(--sheet-2);
+    border: 1px solid var(--edge);
+    border-radius: var(--r-pill);
+    font-size: 12px;
+    color: var(--ink-2);
+}
+
+.chip mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+.chipRemove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 2px;
+    border-radius: 50%;
+    color: var(--ink-3);
+}
+
+.chipRemove:hover {
+    background: var(--edge);
+    color: var(--ink);
+}
+
+.chipRemove mat-icon {
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
+}
+
+.inputArea{
+    width: 100%;
+    height: 50px;
+    display: flex;
+}
+
+.inputArea input{
+    border: none;
+    outline: none;
+    background-color: transparent;
+    color: var(--ink);
+    width: 100%;
+    height: 50px;
+    padding: 0 16px;
+    font-size: 14px;
+}
+
+.inputArea input::placeholder {
+    color: var(--ink-3);
+}
+
+.inputArea button{
+    flex-shrink: 0;
+    width: 50px;
+    height: 50px;
+    background-color: transparent;
+    border: none;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--dur) var(--ease);
+}
+
+.inputArea button:disabled {
+    color: var(--ink-3);
+    cursor: not-allowed;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px 10px;
+    border-top: 1px solid var(--edge);
+}
+
+.actions button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 12px;
+    background: transparent;
+    border: 1px solid var(--edge-strong);
+    border-radius: var(--r-pill);
+    color: var(--ink-2);
+    font-size: 12px;
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.actions button:first-child {
+    padding: 0;
+    width: 30px;
+    justify-content: center;
+}
+
+.actions button mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.actions button:hover {
+    background: var(--sheet-2);
+    color: var(--ink);
+}
+
+.recordButn.active {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #ffffff;
+}
+
+.recordButn.active:hover {
+    background: var(--danger);
+    color: #ffffff;
+}

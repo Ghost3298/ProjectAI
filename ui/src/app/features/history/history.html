@@ -1,0 +1,31 @@
+<div class="history">
+    <div class="searchRow">
+        <mat-icon>search</mat-icon>
+        <input
+            type="text"
+            placeholder="Search sessions..."
+            [value]="query()"
+            (input)="updateQuery($any($event.target).value)"
+        />
+    </div>
+
+    <div class="sessionList">
+        @if (sessions().length === 0) {
+            <div class="empty-state">
+                <mat-icon>history</mat-icon>
+                <span class="empty-title">No sessions yet</span>
+                <span class="empty-hint">Recorded and saved transcripts will show up here.</span>
+            </div>
+        } @else {
+            @for (session of sessions(); track session.id) {
+                <button type="button" class="sessionItem">
+                    <mat-icon>description</mat-icon>
+                    <div class="sessionMeta">
+                        <span class="sessionTitle">{{ session.title }}</span>
+                        <span class="sessionSub">{{ session.durationLabel }}</span>
+                    </div>
+                </button>
+            }
+        }
+    </div>
+</div>
