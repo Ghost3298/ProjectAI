@@ -10,3 +10,4 @@ faster-whisper
 ctranslate2==4.4.0
 nvidia-cublas-cu12
 nvidia-cudnn-cu12==8.9.7.29
+nemo_toolkit[asr]
