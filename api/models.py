@@ -1,4 +1,4 @@
-from sqlalchemy import DateTime, Text, String, Column, Uuid, ForeignKey
+from sqlalchemy import DateTime, Text, String, Column, Uuid, ForeignKey, Float
 from sqlalchemy.sql import func
 from db import Base
 import uuid
@@ -65,4 +65,40 @@ class Translation(Base):
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now()
+    )
+
+class Turn(Base):
+    __tablename__ = "turns"
+
+    id = Column(
+            Uuid(as_uuid=True),
+            primary_key= True,
+            default= uuid.uuid4,
+            server_default= func.gen_random_uuid()   
+        )
+
+    job_id = Column(
+            Uuid(as_uuid=True), 
+            ForeignKey("jobs.id"), 
+            nullable=False
+        )
+
+    start_time = Column(
+        Float,
+        nullable=False
+    )
+
+    end_time = Column(
+        Float,
+        nullable=False
+    )
+
+    speaker_label = Column(
+        String,
+        nullable=False
+    )
+
+    speaker_id = Column(
+        Uuid(as_uuid=True),
+        nullable=True
     )

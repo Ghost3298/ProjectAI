@@ -1,6 +1,6 @@
 from fastapi import Depends, FastAPI, UploadFile, HTTPException
 from db import Base, engine, get_db
-from models import Job
+from models import Job, Turn
 from storage import ensure_bucket_exists, s3_client
 from sqlalchemy.orm import Session
 import os
