@@ -15,6 +15,23 @@
     </div>
 
     <div class="settingGroup">
+        <span class="groupLabel">Time zone</span>
+
+        <div class="settingRow">
+            <mat-icon>schedule</mat-icon>
+            <div class="rowText">
+                <span class="rowTitle">Displayed time zone</span>
+                <span class="rowSub">Some browsers (privacy-hardened setups especially) report UTC instead of your real time zone - set it manually if timestamps look off</span>
+            </div>
+            <select class="tzSelect" [value]="utcOffsetMinutes()" (change)="updateUtcOffset($any($event.target).value)">
+                @for (option of timezoneOptions; track option.minutes) {
+                    <option [value]="option.minutes">{{ option.label }}</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <!-- <div class="settingGroup">
         <span class="groupLabel">Session</span>
 
         <button type="button" class="settingRow" (click)="toggleAutosave()">
@@ -38,5 +55,5 @@
                 <span class="knob"></span>
             </span>
         </button>
-    </div>
+    </div> -->
 </div>

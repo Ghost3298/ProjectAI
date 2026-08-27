@@ -1,11 +1,29 @@
 import { Component, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { TimeSettingsService } from '../../services/time-settings.service';
 
 type Theme = 'light' | 'dark';
 
 const THEME_KEY = 'ai-transcript.theme';
 const AUTOSAVE_KEY = 'ai-transcript.autosave';
 const TIMESTAMPS_KEY = 'ai-transcript.timestamps';
+
+export interface TimezoneOption {
+  minutes: number;
+  label: string;
+}
+
+function buildTimezoneOptions(): TimezoneOption[] {
+  const options: TimezoneOption[] = [];
+  for (let minutes = -12 * 60; minutes <= 14 * 60; minutes += 30) {
+    const sign = minutes >= 0 ? '+' : '-';
+    const abs = Math.abs(minutes);
+    const hh = Math.floor(abs / 60);
+    const mm = abs % 60;
+    options.push({ minutes, label: `UTC${sign}${hh}${mm ? ':30' : ''}` });
+  }
+  return options;
+}
 
 @Component({
   selector: 'app-settings',
@@ -17,6 +35,17 @@ export class Settings {
   protected readonly theme = signal<Theme>(this.readTheme());
   protected readonly autosave = signal<boolean>(this.readBool(AUTOSAVE_KEY, true));
   protected readonly showTimestamps = signal<boolean>(this.readBool(TIMESTAMPS_KEY, true));
+  protected readonly timezoneOptions = buildTimezoneOptions();
+  protected readonly utcOffsetMinutes;
+
+  constructor(private timeSettings: TimeSettingsService) {
+    this.utcOffsetMinutes = this.timeSettings.utcOffsetMinutes;
+  }
+
+  updateUtcOffset(value: string): void {
+    const minutes = parseInt(value, 10);
+    if (!Number.isNaN(minutes)) this.timeSettings.setOffsetMinutes(minutes);
+  }
 
   toggleTheme(): void {
     const next: Theme = this.theme() === 'dark' ? 'light' : 'dark';

@@ -92,3 +92,13 @@
     transform: translateX(14px);
     background: #ffffff;
 }
+
+.tzSelect {
+    flex-shrink: 0;
+    background: var(--rack-2);
+    border: 1px solid var(--rack-edge);
+    border-radius: var(--r-md);
+    color: var(--rack-ink);
+    font-size: 12px;
+    padding: 6px 8px;
+}

@@ -18,13 +18,18 @@
             </div>
         } @else {
             @for (session of sessions(); track session.id) {
-                <button type="button" class="sessionItem">
-                    <mat-icon>description</mat-icon>
-                    <div class="sessionMeta">
-                        <span class="sessionTitle">{{ session.title }}</span>
-                        <span class="sessionSub">{{ session.durationLabel }}</span>
-                    </div>
-                </button>
+                <div class="sessionItem">
+                    <button type="button" class="sessionOpenButn" (click)="openSession(session.id)">
+                        <mat-icon>description</mat-icon>
+                        <div class="sessionMeta">
+                            <span class="sessionTitle">{{ session.title }}</span>
+                            <span class="sessionSub">{{ session.subLabel }}</span>
+                        </div>
+                    </button>
+                    <button type="button" class="sessionRenameButn" (click)="renameSession(session.id, session.title)">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                </div>
             }
         }
     </div>

@@ -48,6 +48,27 @@
     word-break: break-word;
 }
 
+.noteRow.hasSpeaker {
+    flex-direction: column;
+    gap: 2px;
+}
+
+.noteHeader {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.noteSpeaker {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.noteRow.hasSpeaker .noteTime {
+    padding-top: 0;
+}
+
 .tools{
     flex-shrink: 0;
     height: 44px;

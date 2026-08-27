@@ -59,13 +59,8 @@
 .sessionItem {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px;
-    background: transparent;
     border: 1px solid transparent;
     border-radius: var(--r-md);
-    color: var(--rack-ink);
-    text-align: left;
 }
 
 .sessionItem:hover {
@@ -73,7 +68,40 @@
     border-color: var(--rack-edge);
 }
 
-.sessionItem mat-icon {
+.sessionOpenButn {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: transparent;
+    border: none;
+    color: var(--rack-ink);
+    text-align: left;
+}
+
+.sessionRenameButn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    margin-right: 6px;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    color: var(--rack-ink-3);
+}
+
+.sessionRenameButn:hover {
+    background: var(--rack-1);
+    color: var(--rack-ink);
+}
+
+.sessionOpenButn mat-icon,
+.sessionRenameButn mat-icon {
     font-size: 18px;
     width: 18px;
     height: 18px;

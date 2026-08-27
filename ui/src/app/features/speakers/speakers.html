@@ -1,0 +1,49 @@
+<div class="speakers">
+    <div class="enrollForm">
+        <input
+            type="text"
+            placeholder="Speaker name..."
+            [value]="nameDraft()"
+            (input)="updateNameDraft($any($event.target).value)"
+        />
+        <div class="enrollActions">
+            <input type="file" #fileInput hidden accept="audio/*" (change)="onFileSelected($event)" />
+            <button type="button" [disabled]="!nameDraft().trim()" (click)="fileInput.click()">
+                <mat-icon>upload_file</mat-icon>
+            </button>
+            <button
+                type="button"
+                class="recordButn"
+                [class.active]="isRecording()"
+                [disabled]="!nameDraft().trim() && !isRecording()"
+                (click)="toggleRecording()"
+            >
+                <mat-icon>{{ isRecording() ? 'stop_circle' : 'mic' }}</mat-icon>
+                {{ isRecording() ? 'Stop' : 'Record sample' }}
+            </button>
+        </div>
+    </div>
+
+    <div class="speakerList">
+        @if (speakers().length === 0) {
+            <div class="empty-state">
+                <mat-icon>person</mat-icon>
+                <span class="empty-title">No speakers enrolled</span>
+                <span class="empty-hint">Enroll a voice sample above so future transcripts can name this speaker.</span>
+            </div>
+        } @else {
+            @for (speaker of speakers(); track speaker.speaker_id) {
+                <div class="speakerItem">
+                    <mat-icon>person</mat-icon>
+                    <div class="speakerMeta">
+                        <span class="speakerName">{{ speaker.name }}</span>
+                        <span class="speakerSub">{{ speaker.status }}</span>
+                    </div>
+                    <button type="button" class="speakerDeleteButn" (click)="deleteSpeaker(speaker.speaker_id, speaker.name)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+            }
+        }
+    </div>
+</div>

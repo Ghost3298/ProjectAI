@@ -1,7 +1,52 @@
 from sqlalchemy import DateTime, Text, String, Column, Uuid, ForeignKey, Float
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.sql import func
 from db import Base
 import uuid
+
+class RecordingSession(Base):
+    __tablename__ = "sessions"
+
+    id = Column(
+        Uuid(as_uuid=True),
+        primary_key= True,
+        default= uuid.uuid4,
+        server_default= func.gen_random_uuid()
+    )
+
+    name = Column(
+        String,
+        nullable=True
+    )
+
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+class SessionNote(Base):
+    __tablename__ = "session_notes"
+
+    id = Column(
+        Uuid(as_uuid=True),
+        primary_key= True,
+        default= uuid.uuid4,
+        server_default= func.gen_random_uuid()
+    )
+
+    session_id = Column(
+        Uuid(as_uuid=True),
+        ForeignKey("sessions.id"),
+        nullable=False
+    )
+
+    text = Column(
+        Text,
+        nullable=False
+    )
+
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now()
+    )
 
 class Job(Base):
     __tablename__ = "jobs"
@@ -11,6 +56,12 @@ class Job(Base):
         primary_key= True,
         default= uuid.uuid4,
         server_default= func.gen_random_uuid()
+    )
+
+    session_id = Column(
+        Uuid(as_uuid=True),
+        ForeignKey("sessions.id"),
+        nullable=True
     )
 
     status = Column(
@@ -24,6 +75,11 @@ class Job(Base):
         index= True
     )
 
+    name = Column(
+        String,
+        nullable=True
+    )
+
     storage_path = Column(
         String,
         nullable= False
@@ -31,6 +87,16 @@ class Job(Base):
 
     transcript = Column(
         Text
+    )
+
+    detected_language = Column(
+        String,
+        nullable=True
+    )
+
+    error_message = Column(
+        Text,
+        nullable=True
     )
 
     created_at = Column(
@@ -67,6 +133,45 @@ class Translation(Base):
         server_default=func.now()
     )
 
+class Speaker(Base):
+    __tablename__ = "speakers"
+
+    id = Column(
+        Uuid(as_uuid=True),
+        primary_key= True,
+        default= uuid.uuid4,
+        server_default= func.gen_random_uuid()
+    )
+
+    name = Column(
+        String,
+        nullable=False
+    )
+
+    status = Column(
+        String,
+        nullable=False
+    )
+
+    storage_path = Column(
+        String,
+        nullable=False
+    )
+
+    embedding = Column(
+        ARRAY(Float),
+        nullable=True
+    )
+
+    error_message = Column(
+        Text,
+        nullable=True
+    )
+
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
 class Turn(Base):
     __tablename__ = "turns"
 
@@ -98,7 +203,13 @@ class Turn(Base):
         nullable=False
     )
 
+    text = Column(
+        Text,
+        nullable=True
+    )
+
     speaker_id = Column(
         Uuid(as_uuid=True),
+        ForeignKey("speakers.id"),
         nullable=True
     )

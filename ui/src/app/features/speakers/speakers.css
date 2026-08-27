@@ -1,0 +1,152 @@
+.speakers {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.enrollForm {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 12px;
+    padding: 10px 12px;
+    background: var(--rack-2);
+    border: 1px solid var(--rack-edge);
+    border-radius: var(--r-md);
+}
+
+.enrollForm input[type="text"] {
+    border: none;
+    background: transparent;
+    color: var(--rack-ink);
+    font-size: 13px;
+    outline: none;
+}
+
+.enrollForm input[type="text"]::placeholder {
+    color: var(--rack-ink-3);
+}
+
+.enrollActions {
+    display: flex;
+    gap: 8px;
+}
+
+.enrollActions button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 12px;
+    background: transparent;
+    border: 1px solid var(--rack-edge);
+    border-radius: var(--r-pill);
+    color: var(--rack-ink-2);
+    font-size: 12px;
+}
+
+.enrollActions button:hover:not(:disabled) {
+    background: var(--rack-1);
+}
+
+.enrollActions button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.enrollActions button:first-child {
+    padding: 0;
+    width: 30px;
+    justify-content: center;
+}
+
+.enrollActions button mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.recordButn.active {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #ffffff;
+}
+
+.speakerList {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 8px 12px;
+}
+
+.speakerList .empty-state {
+    color: var(--rack-ink-3);
+}
+
+.speakerList .empty-state .empty-title {
+    color: var(--rack-ink-2);
+}
+
+.speakerItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: var(--r-md);
+    color: var(--rack-ink);
+}
+
+.speakerItem:hover {
+    background: var(--rack-2);
+}
+
+.speakerItem mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--rack-ink-3);
+    flex-shrink: 0;
+}
+
+.speakerMeta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.speakerDeleteButn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    color: var(--rack-ink-3);
+}
+
+.speakerDeleteButn:hover {
+    background: var(--rack-1);
+    color: var(--danger);
+}
+
+.speakerName {
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.speakerSub {
+    font-size: 11px;
+    color: var(--rack-ink-3);
+}

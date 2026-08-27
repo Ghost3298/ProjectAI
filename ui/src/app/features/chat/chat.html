@@ -8,9 +8,17 @@
             </div>
         } @else {
             @for (note of notes(); track note.id) {
-                <div class="noteRow">
-                    <span class="noteTime">{{ note.time | date: 'shortTime' }}</span>
-                    <span class="noteText">{{ note.text }}</span>
+                <div class="noteRow" [class.hasSpeaker]="note.speaker">
+                    @if (note.speaker) {
+                        <div class="noteHeader">
+                            <span class="noteSpeaker">{{ note.speaker }}</span>
+                            <span class="noteTime">{{ note.time | date: 'shortTime' : tzOffset() }}</span>
+                        </div>
+                        <span class="noteText">{{ note.text }}</span>
+                    } @else {
+                        <span class="noteTime">{{ note.time | date: 'shortTime' : tzOffset() }}</span>
+                        <span class="noteText">{{ note.text }}</span>
+                    }
                 </div>
             }
         }
@@ -22,6 +30,9 @@
         </button>
         <button class="toolButn" type="button" [disabled]="notes().length === 0" (click)="saveAsTxt()">
             <mat-icon>download</mat-icon>Save as txt
+        </button>
+        <button class="toolButn" type="button" (click)="startNewSession()">
+            <mat-icon>add</mat-icon>New session
         </button>
     </div>
 </div>
