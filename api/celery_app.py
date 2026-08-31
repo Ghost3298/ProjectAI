@@ -1,7 +1,8 @@
 import subprocess
 from celery import Celery
-import os, time, wave
+import os, time, wave, json
 import numpy as np
+import requests
 from models import Job, Turn, Speaker
 from db import get_db_context
 from storage import s3_client
@@ -26,6 +27,16 @@ titanet_model = None
 DIARIZATION_CHUNK_SECONDS = 60.0
 DIARIZATION_MAX_SINGLE_PASS_SECONDS = 90.0
 
+# Whisper detects language ONCE from roughly the first ~30s of audio, then
+# transcribes the ENTIRE recording using that single language. A recording
+# that starts in English and switches to Arabic (or vice versa) gets the
+# Arabic portion force-decoded as English - the model does its best to
+# output English-sounding words for audio it's been told is English,
+# which is why a language switch shows up looking "translated" instead of
+# transcribed. Re-detecting language every chunk catches a mid-recording
+# switch at roughly this granularity.
+TRANSCRIPTION_CHUNK_SECONDS = 30.0
+
 # Titanet embeddings on clips shorter than this are unreliable, so those
 # turns keep their raw (possibly chunk-local) diarization label instead of
 # being voice-clustered.
@@ -41,10 +52,33 @@ CLUSTER_SIMILARITY_THRESHOLD = 0.6
 # against real eval data yet.
 ENROLLED_MATCH_THRESHOLD = 0.6
 
+LLM_API_BASE = os.environ.get("LLM_API_BASE", "http://llm:8000/v1")
+LLM_MODEL = os.environ.get("LLM_MODEL", "Qwen/Qwen2.5-3B-Instruct-AWQ")
+# Qwen2.5-3B's context is small and shared with the prompt + output, so the
+# transcript is truncated rather than risking a context-length error on long
+# recordings. Good enough for a summary; not meant for verbatim recall.
+LLM_MAX_TRANSCRIPT_CHARS = 6000
+
+SUMMARY_SYSTEM_PROMPT = (
+    "You read a speech transcript and produce a concise summary plus key "
+    "entities mentioned in it. Always respond in the SAME language the "
+    "transcript is written in - never translate it. Respond with strict "
+    "JSON only, no markdown formatting, no code fences, matching exactly "
+    "this shape: "
+    '{"summary": "2-4 sentence summary", '
+    '"entities": [{"type": "person|organization|date|location|other", "value": "..."}]}'
+)
+
 def get_whisper_model():
     global whisper_model
     if whisper_model is None:
-        whisper_model = WhisperModel("small", device="cuda", compute_type="float16")
+        # "small" struggled with Lebanese/Levantine Arabic specifically (a
+        # lower-resource dialect Whisper sees less of in training). "medium"
+        # (~1.5GB VRAM vs small's ~730MB) is meaningfully more accurate on
+        # dialectal speech - still fits this 8GB card alongside NeMo/Titanet/
+        # vLLM. Not switching to large-v3 (~3GB): too tight alongside vLLM's
+        # own ~2.8GB reservation.
+        whisper_model = WhisperModel("medium", device="cuda", compute_type="float16")
     return whisper_model
 
 def get_diarization_model():
@@ -197,6 +231,90 @@ def match_clusters_to_enrolled_speakers(clusters, enrolled_speakers):
             matches[cluster["label"]] = (best_id, best_name)
     return matches
 
+def summarize_and_extract_entities(transcript_text):
+    if not transcript_text or not transcript_text.strip():
+        return None, []
+
+    response = requests.post(
+        f"{LLM_API_BASE}/chat/completions",
+        json={
+            "model": LLM_MODEL,
+            "messages": [
+                {"role": "system", "content": SUMMARY_SYSTEM_PROMPT},
+                {"role": "user", "content": transcript_text[:LLM_MAX_TRANSCRIPT_CHARS]},
+            ],
+            "temperature": 0.2,
+            "max_tokens": 512,
+            "response_format": {"type": "json_object"},
+        },
+        timeout=120,
+    )
+    response.raise_for_status()
+    content = response.json()["choices"][0]["message"]["content"]
+
+    parsed = json.loads(content)
+    summary = parsed.get("summary")
+    entities = parsed.get("entities", [])
+    if not isinstance(entities, list):
+        entities = []
+
+    return summary, entities
+
+def compute_chunk_bounds(duration, chunk_seconds, min_last_chunk_seconds=10.0):
+    # A final leftover shorter than this (e.g. a 2.8s tail) doesn't give
+    # Whisper enough audio to detect its language reliably - merging it into
+    # the previous chunk instead of transcribing it standalone avoids that.
+    bounds = []
+    offset = 0.0
+    while offset < duration:
+        remaining = duration - offset
+        if remaining <= chunk_seconds:
+            if bounds and remaining < min_last_chunk_seconds:
+                prev_start, _ = bounds[-1]
+                bounds[-1] = (prev_start, duration)
+            else:
+                bounds.append((offset, duration))
+            break
+        bounds.append((offset, offset + chunk_seconds))
+        offset += chunk_seconds
+    return bounds
+
+def transcribe_audio(model, wav_path):
+    duration = get_wav_duration_seconds(wav_path)
+
+    all_segments = []
+    languages = []  # (chunk_duration, language) - majority-duration language wins as the job's overall detected_language
+    for offset, chunk_end in compute_chunk_bounds(duration, TRANSCRIPTION_CHUNK_SECONDS):
+        chunk_len = chunk_end - offset
+        with tempfile.NamedTemporaryFile(suffix=".wav") as chunk_file:
+            subprocess.run(
+                [
+                    'ffmpeg', '-y', '-i', wav_path,
+                    '-ss', str(offset), '-t', str(chunk_len),
+                    '-ar', '16000', '-ac', '1', chunk_file.name,
+                ],
+                check=True,
+            )
+            # No language= forced: Whisper only has a single "ar" code
+            # covering every Arabic dialect (Gulf, Egyptian, Levantine,
+            # Maghrebi, ...), and every other language, so auto-detect is
+            # both correct and dialect-agnostic. Forcing "ar" garbles
+            # non-Arabic speech into phonetic Arabic script instead of
+            # failing cleanly.
+            segments, info = model.transcribe(chunk_file.name, vad_filter=True, word_timestamps=True)
+            for segment in segments:
+                segment.start += offset
+                segment.end += offset
+                if segment.words:
+                    for word in segment.words:
+                        word.start += offset
+                        word.end += offset
+                all_segments.append(segment)
+            languages.append((chunk_len, info.language))
+
+    detected_language = max(languages, key=lambda pair: pair[0])[1] if languages else None
+    return all_segments, detected_language
+
 def diarize_audio(diarization_model_instance, wav_path):
     duration = get_wav_duration_seconds(wav_path)
 
@@ -253,20 +371,13 @@ def process_job(job_id):
             )
 
             model = get_whisper_model()
-            # No language= forced: Whisper only has a single "ar" code covering
-            # every Arabic dialect (Gulf, Egyptian, Levantine, Maghrebi, ...),
-            # and every other language, so auto-detect is both correct and
-            # dialect-agnostic. Forcing "ar" garbles non-Arabic speech into
-            # phonetic Arabic script instead of failing cleanly.
             # vad_filter drops silence so segment timestamps line up with the
             # true audio duration instead of drifting/truncating on longer files.
             # word_timestamps=True is required for assign_text_to_turns to split
             # a segment across a speaker change rather than assigning the whole
             # segment to one speaker.
-            segments, info = model.transcribe(normalized_file.name, vad_filter=True, word_timestamps=True)
-            segments_list = list(segments)
+            segments_list, detected_language = transcribe_audio(model, normalized_file.name)
             full_text = " ".join(segment.text for segment in segments_list).strip()
-            detected_language = info.language
 
             diarization_model_instance = get_diarization_model()
             parsed_turns = diarize_audio(diarization_model_instance, normalized_file.name)
@@ -284,6 +395,15 @@ def process_job(job_id):
             merged_turns = merge_adjacent_same_speaker_turns(relabeled_turns)
             turns_with_text = assign_text_to_turns(merged_turns, segments_list)
 
+        # Best-effort: the LLM service being slow/unavailable shouldn't fail
+        # an otherwise-successful transcription. Summary/entities just come
+        # back empty in that case rather than the whole job erroring out.
+        try:
+            summary, entities = summarize_and_extract_entities(full_text)
+        except Exception as exc:
+            print(f"Summarization failed for job {job_id}: {exc}")
+            summary, entities = None, []
+
         with get_db_context() as db:
             enrolled_speakers = [
                 (speaker.id, speaker.name, speaker.embedding)
@@ -295,6 +415,8 @@ def process_job(job_id):
             job = db.query(Job).filter(Job.id == job_id).first()
             job.transcript = full_text
             job.detected_language = detected_language
+            job.summary = summary
+            job.entities = entities
             job.status = "done"
             for start_time, end_time, speaker_label, text in turns_with_text:
                 matched_id, matched_name = cluster_matches.get(speaker_label, (None, None))

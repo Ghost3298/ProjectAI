@@ -10,6 +10,74 @@
     overflow: hidden;
 }
 
+.summaryPanel {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--edge);
+    max-height: 40%;
+    overflow-y: auto;
+}
+
+.summaryCard {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
+    background: var(--sheet-2);
+    border: 1px solid var(--edge);
+    border-radius: var(--r-md);
+}
+
+.summaryHeader {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.summaryHeader mat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+}
+
+.summaryText {
+    font-size: 13px;
+    color: var(--ink);
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.entityRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.entityChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    background: var(--sheet);
+    border: 1px solid var(--edge);
+    border-radius: var(--r-pill);
+    font-size: 11px;
+    color: var(--ink-2);
+}
+
+.entityType {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
+}
+
 .dialogue{
     width: 100%;
     flex: 1;

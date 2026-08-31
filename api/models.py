@@ -1,5 +1,5 @@
 from sqlalchemy import DateTime, Text, String, Column, Uuid, ForeignKey, Float
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.sql import func
 from db import Base
 import uuid
@@ -91,6 +91,16 @@ class Job(Base):
 
     detected_language = Column(
         String,
+        nullable=True
+    )
+
+    summary = Column(
+        Text,
+        nullable=True
+    )
+
+    entities = Column(
+        JSONB,
         nullable=True
     )
 

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { Observable, map, of, tap } from 'rxjs';
-import { JobService, JobTurn } from '../../services/jobs.service';
+import { JobEntity, JobService, JobTurn } from '../../services/jobs.service';
 import { SessionDetail, SessionJob, SessionsService } from '../../services/sessions.service';
 import { SessionSelectionService } from '../../services/session-selection.service';
 import { TimeSettingsService } from '../../services/time-settings.service';
@@ -15,9 +15,17 @@ export interface TranscriptNote {
   speaker?: string;
 }
 
+export interface SummaryCard {
+  jobId: string;
+  text: string;
+  entities: JobEntity[];
+}
+
 interface JobLike {
   status: string;
   transcript: string | null;
+  summary: string | null;
+  entities: JobEntity[] | null;
   error_message: string | null;
   created_at: string | null;
   turns: JobTurn[];
@@ -41,6 +49,7 @@ export class Chat {
   private readonly dialogueEl = viewChild<ElementRef<HTMLDivElement>>('dialogueRef');
 
   protected readonly notes = signal<TranscriptNote[]>([]);
+  protected readonly summaries = signal<SummaryCard[]>([]);
   protected readonly draft = signal('');
   protected readonly isRecording = signal(false);
   protected readonly attachments = signal<string[]>([]);
@@ -93,9 +102,19 @@ export class Chat {
       next: (session) => {
         this.currentSessionId.set(sessionId);
         this.notes.set(this.buildNotesFromSession(session));
+        this.summaries.set(
+          session.jobs
+            .map((job) => this.extractSummaryCard(job.job_id, job))
+            .filter((card): card is SummaryCard => card !== null)
+        );
       },
       error: (err) => console.log(err),
     });
+  }
+
+  private extractSummaryCard(jobId: string, job: JobLike | SessionJob): SummaryCard | null {
+    if (job.status !== 'done' || !job.summary) return null;
+    return { jobId, text: job.summary, entities: job.entities ?? [] };
   }
 
   private buildNotesFromSession(session: SessionDetail): TranscriptNote[] {
@@ -175,6 +194,11 @@ export class Chat {
           if (job.status === 'done' || job.status === 'failed') {
             clearInterval(this.pollHandles.get(jobId));
             this.pollHandles.delete(jobId);
+
+            const summaryCard = this.extractSummaryCard(jobId, job);
+            if (summaryCard) {
+              this.summaries.update((current) => [...current, summaryCard]);
+            }
           }
         },
         error: (err) => {
@@ -286,6 +310,7 @@ export class Chat {
 
     this.currentSessionId.set(null);
     this.notes.set([]);
+    this.summaries.set([]);
     this.draft.set('');
     this.attachments.set([]);
   }

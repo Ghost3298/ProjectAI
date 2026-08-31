@@ -19,7 +19,12 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200"],
+    # Browsers treat localhost/127.0.0.1/a LAN IP as different origins even
+    # though they're the same machine, so allowlisting one exact string
+    # broke as soon as the UI was accessed any other way. No auth/cookies
+    # here to protect, so allowing any origin removes this whole class of
+    # mismatch instead of trying to enumerate every valid one.
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -119,6 +124,8 @@ def get_session(session_id: str, db: Session = Depends(get_db)):
             "status": job.status,
             "transcript": job.transcript,
             "detected_language": job.detected_language,
+            "summary": job.summary,
+            "entities": job.entities,
             "error_message": job.error_message,
             "created_at": job.created_at.isoformat() if job.created_at else None,
             "turns": [
@@ -248,6 +255,8 @@ def get_job(job_id: str, db: Session = Depends(get_db)):
         "status" : job.status,
         "transcript" : job.transcript,
         "detected_language" : job.detected_language,
+        "summary" : job.summary,
+        "entities" : job.entities,
         "error_message" : job.error_message,
         "created_at" : job.created_at.isoformat() if job.created_at else None,
         "turns" : [

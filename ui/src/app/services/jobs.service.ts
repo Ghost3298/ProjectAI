@@ -10,11 +10,18 @@ export interface JobTurn {
     speaker_id: string | null;
 }
 
+export interface JobEntity {
+    type: string;
+    value: string;
+}
+
 export interface JobDetail {
     job_id: string;
     status: string;
     transcript: string | null;
     detected_language: string | null;
+    summary: string | null;
+    entities: JobEntity[] | null;
     error_message: string | null;
     created_at: string | null;
     turns: JobTurn[];

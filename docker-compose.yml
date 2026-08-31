@@ -55,6 +55,12 @@ services:
       retries: 5
       start_period: 30s
 
+  ui:
+    build: ./ui/
+    ports:
+      - "4200:80"
+    restart: unless-stopped
+
   api:
     build: ./api/
     ports:
@@ -86,8 +92,28 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      # Same Xet-hang risk as llm (see its comment) - this container also
+      # downloads HF-hosted models (Whisper, Sortformer).
+      HF_HUB_DISABLE_XET: "1"
+    # Docker's embedded per-container DNS resolver ended up with no upstream
+    # nameserver after a host reboot (a dockerd/NetworkManager boot-order
+    # race - host's own /etc/resolv.conf was fine), breaking every external
+    # download (HF Hub, NVIDIA NGC) with "Temporary failure in name
+    # resolution". Can't restart the docker daemon itself without sudo, so
+    # this points the container straight at public resolvers instead.
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     volumes:
       - hf_cache:/root/.cache/huggingface
+      # Whisper and Sortformer cache under /root/.cache/huggingface (covered
+      # above, persists fine across rebuilds). Titanet's from_pretrained()
+      # call resolves through NeMo's older NGC-based downloader instead,
+      # which caches under /root/.cache/torch/NeMo/ - a path this compose
+      # file never mounted, so every worker rebuild silently re-downloaded
+      # Titanet from scratch. This is the actual fix for "why does this need
+      # internet" - true one-time downloads, not a real offline requirement.
+      - nemo_cache:/root/.cache/torch
     deploy:
       resources:
         reservations:
@@ -101,9 +127,78 @@ services:
     command: ["celery", "-A", "celery_app", "worker", "--loglevel", "info", "--pool=solo"]
     restart: unless-stopped
 
+  llm:
+    image: vllm/vllm-openai:latest
+    container_name: llm
+    ports:
+      - "8001:8000"
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      # vllm/vllm-openai's base image declares NVIDIA_REQUIRE_CUDA driver
+      # ranges that top out in the mid-570s. This host's driver (595.84) is
+      # newer and actually fine (NVIDIA drivers are backward-compatible),
+      # but nvidia-container-toolkit enforces that declared range literally
+      # and refuses to start otherwise - nvidia-smi still works (NVML-only,
+      # unaffected) while the real CUDA init fails. This skips that check.
+      NVIDIA_DISABLE_REQUIRE: "1"
+      # The actual hang (misdiagnosed at first as a CUDA/attention-backend
+      # issue, since "Using FlashAttention version 2" was the last log line
+      # before going silent) was the model weight download itself: HF Hub's
+      # newer "Xet" transfer protocol was wedging silently on this network,
+      # confirmed via py-spy dump showing the process parked in xet_get.
+      # This forces the plain HTTP download path instead.
+      HF_HUB_DISABLE_XET: "1"
+    # Same embedded-DNS-resolver issue as worker (see its comment) - this
+    # container needs external DNS too (HF Hub).
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    volumes:
+      - hf_cache:/root/.cache/huggingface
+    # gpu-memory-utilization is a fraction of the WHOLE card, not "whatever
+    # is free" - vLLM has no idea the worker container is also on this GPU.
+    # Kept low (0.35 of an 8GB card ~= 2.8GB) so it coexists with worker's
+    # Whisper+Sortformer+Titanet (~2-3GB combined) instead of OOM-ing both.
+    # AWQ (4-bit) quantized weights, not fp16, for the same reason - fp16
+    # Qwen2.5-3B alone is ~6GB, which wouldn't leave room for anything else.
+    command:
+      - "--model"
+      - "Qwen/Qwen2.5-3B-Instruct-AWQ"
+      - "--quantization"
+      - "awq"
+      - "--gpu-memory-utilization"
+      - "0.35"
+      - "--max-model-len"
+      - "4096"
+      - "--dtype"
+      - "float16"
+      # Default (non-eager) mode captures CUDA graphs across ~50 batch sizes
+      # plus FlashInfer/CUDE-DSL autotuning on first start - this hung
+      # indefinitely on this host (very new driver, 595.84). Eager mode
+      # skips all of that: slower per-token throughput, but this is an
+      # occasional background summarization call, not high-throughput
+      # serving, so reliability matters more here than raw speed.
+      - "--enforce-eager"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [compute, utility]
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/v1/models', timeout=3)"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 1800s
+    restart: unless-stopped
+
 volumes:
   pgdata:
   minio_data:
   valkey-data:
     driver: local
   hf_cache:
+  nemo_cache:

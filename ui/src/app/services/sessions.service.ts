@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { JobTurn } from "./jobs.service";
+import { JobEntity, JobTurn } from "./jobs.service";
 
 export interface SessionSummary {
     session_id: string;
@@ -19,6 +19,8 @@ export interface SessionJob {
     status: string;
     transcript: string | null;
     detected_language: string | null;
+    summary: string | null;
+    entities: JobEntity[] | null;
     error_message: string | null;
     created_at: string | null;
     turns: JobTurn[];

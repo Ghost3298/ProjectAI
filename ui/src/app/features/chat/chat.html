@@ -1,4 +1,27 @@
 <div class="chat">
+    @if (summaries().length > 0) {
+        <div class="summaryPanel">
+            @for (card of summaries(); track card.jobId) {
+                <div class="summaryCard">
+                    <div class="summaryHeader">
+                        <mat-icon>auto_awesome</mat-icon>
+                        <span>Summary</span>
+                    </div>
+                    <p class="summaryText">{{ card.text }}</p>
+                    @if (card.entities.length > 0) {
+                        <div class="entityRow">
+                            @for (entity of card.entities; track entity.value + entity.type) {
+                                <span class="entityChip">
+                                    <span class="entityType">{{ entity.type }}</span>{{ entity.value }}
+                                </span>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+
     <div class="dialogue" #dialogueRef>
         @if (notes().length === 0) {
             <div class="empty-state">
